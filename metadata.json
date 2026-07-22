@@ -1,0 +1,8 @@
+{
+  "name": "CampusPlace",
+  "description": "A centralized, full-stack college placement portal for students, companies, and placement officers to manage profiles, job drives, automated eligibility, interviews, and real-time statistics.",
+  "requestFramePermissions": [],
+  "majorCapabilities": [
+    "MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"
+  ]
+}
