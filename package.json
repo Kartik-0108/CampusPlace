@@ -4,6 +4,7 @@
   "version": "0.0.0",
   "type": "module",
   "scripts": {
+    "prebuild": "node -e \"const fs=require('fs'); if(!fs.existsSync('firebase-applet-config.json')){fs.writeFileSync('firebase-applet-config.json', process.env.FIREBASE_CONFIG_JSON || '{}');}\"",
     "dev": "tsx backend/index.ts",
     "build": "npm run build:frontend && npm run build:backend",
     "build:frontend": "vite build",
