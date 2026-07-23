@@ -17,7 +17,16 @@ try {
     
     // Check if config is provided via environment variable (easier for cloud platforms like Render)
     if (process.env.FIREBASE_CONFIG_JSON) {
-      firebaseConfig = JSON.parse(process.env.FIREBASE_CONFIG_JSON);
+      try {
+        let jsonStr = process.env.FIREBASE_CONFIG_JSON;
+        // Strip out any JavaScript variable assignment if the user accidentally pasted that
+        if (jsonStr.includes('const firebaseConfig')) {
+          jsonStr = jsonStr.replace(/const\s+firebaseConfig\s*=\s*/, '').replace(/;$/, '');
+        }
+        firebaseConfig = JSON.parse(jsonStr);
+      } catch (err) {
+        console.error('[Firebase] FIREBASE_CONFIG_JSON is invalid JSON. Ensure you only paste the JSON object starting with { and ending with }');
+      }
     } 
     // Fallback to local file
     else if (fs.existsSync(configPath)) {

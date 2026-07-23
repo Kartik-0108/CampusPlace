@@ -4,10 +4,10 @@
   "version": "0.0.0",
   "type": "module",
   "scripts": {
-    "prebuild": "node -e \"const fs=require('fs'); if(!fs.existsSync('firebase-applet-config.json')){fs.writeFileSync('firebase-applet-config.json', process.env.FIREBASE_CONFIG_JSON || '{}');}\"",
+    "prebuild": "node -e \"const fs=require('fs'); let data = '{}'; if (process.env.FIREBASE_CONFIG_JSON) { try { let str = process.env.FIREBASE_CONFIG_JSON; if (str.includes('const firebaseConfig')) { str = str.replace(/const\\s+firebaseConfig\\s*=\\s*/, '').replace(/;$/, ''); } JSON.parse(str); data = str; } catch(e) { console.error('FIREBASE_CONFIG_JSON is invalid JSON. Ensure keys are in quotes.'); } } if(!fs.existsSync('firebase-applet-config.json')){ fs.writeFileSync('firebase-applet-config.json', data); }\"",
     "dev": "tsx backend/index.ts",
     "build": "npm run build:frontend && npm run build:backend",
-    "build:frontend": "vite build",
+    "build:frontend": "npm run prebuild && vite build",
     "build:backend": "esbuild backend/index.ts --bundle --platform=node --format=cjs --packages=external --sourcemap --outfile=dist/server.cjs",
     "start": "node dist/server.cjs",
     "clean": "rm -rf dist server.js",
