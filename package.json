@@ -4,7 +4,7 @@
   "version": "0.0.0",
   "type": "module",
   "scripts": {
-    "prebuild": "node -e \"const fs=require('fs'); let data = '{}'; if (process.env.FIREBASE_CONFIG_JSON) { try { let str = process.env.FIREBASE_CONFIG_JSON; if (str.includes('const firebaseConfig')) { str = str.replace(/const\\s+firebaseConfig\\s*=\\s*/, '').replace(/;$/, ''); } JSON.parse(str); data = str; } catch(e) { console.error('FIREBASE_CONFIG_JSON is invalid JSON. Ensure keys are in quotes.'); } } if(!fs.existsSync('firebase-applet-config.json')){ fs.writeFileSync('firebase-applet-config.json', data); }\"",
+    "prebuild": "node -e \"const fs=require('fs'); let data; if (process.env.FIREBASE_CONFIG_JSON) { try { let str = process.env.FIREBASE_CONFIG_JSON.trim(); const startIdx = str.indexOf('{'); const endIdx = str.lastIndexOf('}'); if (startIdx !== -1 && endIdx !== -1) { str = str.substring(startIdx, endIdx + 1); } let obj; try { obj = (new Function('return (' + str + ')'))(); } catch(e) { obj = JSON.parse(str); } if (obj && typeof obj === 'object') { data = JSON.stringify(obj, null, 2); } } catch(e) { console.error('Parse error:', e.message); } } const path = 'firebase-applet-config.json'; if (data) { fs.writeFileSync(path, data); console.log('Wrote config'); } else if (!fs.existsSync(path)) { fs.writeFileSync(path, '{}'); }\"",
     "dev": "tsx backend/index.ts",
     "build": "npm run build:frontend && npm run build:backend",
     "build:frontend": "npm run prebuild && vite build",
