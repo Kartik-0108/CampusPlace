@@ -9,6 +9,7 @@ import AdminDashboard from './components/AdminDashboard.tsx';
 import NotificationBell from './components/NotificationBell.tsx';
 import MainframeLoading from './components/MainframeLoading.tsx';
 import ThemeTransition from './components/ThemeTransition.tsx';
+import { getFirebaseInitError } from './services/gmail.ts';
 import { LogOut, Shield, BookOpen, Building, RefreshCw, Sparkles, Sliders, ArrowRight, Sun, Moon, GraduationCap } from 'lucide-react';
 import { motion } from 'motion/react';
 
@@ -126,12 +127,22 @@ export default function App() {
   }
 
   if (!user) {
+    const firebaseError = getFirebaseInitError();
     return (
-      <AuthScreen 
-        onAuthSuccess={handleAuthSuccess} 
-        isLightMode={isLightMode}
-        onToggleTheme={toggleTheme}
-      />
+      <div className="min-h-screen bg-[#030704] text-emerald-300 flex flex-col font-sans crt-container pixel-grid">
+        {firebaseError && (
+          <div className="bg-amber-950/20 theme-light:bg-amber-50 border-b border-amber-500/20 theme-light:border-amber-200 px-4 py-2.5 text-center text-xs text-amber-400 theme-light:text-amber-800 flex items-center justify-center gap-2 font-mono relative z-50">
+            <span>⚠️ <b>Firebase System Notice:</b> {firebaseError}</span>
+          </div>
+        )}
+        <div className="flex-1 flex flex-col">
+          <AuthScreen 
+            onAuthSuccess={handleAuthSuccess} 
+            isLightMode={isLightMode}
+            onToggleTheme={toggleTheme}
+          />
+        </div>
+      </div>
     );
   }
 
@@ -144,9 +155,15 @@ export default function App() {
     { id: 'usr_comp4', label: 'Infosys (Unapproved Recruiter)', role: 'company', icon: Building, bg: 'hover:bg-slate-100' }
   ];
 
+  const firebaseError = getFirebaseInitError();
+
   return (
     <div className="min-h-screen bg-[#030704] text-emerald-300 flex flex-col font-sans crt-container pixel-grid">
-      
+      {firebaseError && (
+        <div className="bg-amber-950/20 theme-light:bg-amber-50 border-b border-amber-500/20 theme-light:border-amber-200 px-4 py-2.5 text-center text-xs text-amber-400 theme-light:text-amber-800 flex items-center justify-center gap-2 font-mono relative z-50">
+          <span>⚠️ <b>Firebase System Notice:</b> {firebaseError}</span>
+        </div>
+      )}
       {/* Header bar */}
       <header className="bg-[#050a06]/90 backdrop-blur-md border-b-2 border-emerald-500/25 sticky top-0 z-40 relative">
         <div className="max-w-7xl mx-auto w-full px-4 sm:px-6 lg:px-8 h-14 flex items-center justify-between">

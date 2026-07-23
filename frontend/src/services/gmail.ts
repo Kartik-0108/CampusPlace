@@ -2,10 +2,29 @@ import { initializeApp } from 'firebase/app';
 import { getAuth, signInWithPopup, GoogleAuthProvider, User, onAuthStateChanged } from 'firebase/auth';
 import firebaseConfig from '../../../firebase-applet-config.json';
 
-const app = initializeApp(firebaseConfig);
-const auth = getAuth(app);
-const provider = new GoogleAuthProvider();
-provider.addScope('https://www.googleapis.com/auth/gmail.send');
+let app: any = null;
+let auth: any = null;
+let provider: any = null;
+let initError: string | null = null;
+
+try {
+  if (firebaseConfig && firebaseConfig.apiKey && firebaseConfig.apiKey.trim() !== "") {
+    app = initializeApp(firebaseConfig);
+    auth = getAuth(app);
+    provider = new GoogleAuthProvider();
+    provider.addScope('https://www.googleapis.com/auth/gmail.send');
+  } else {
+    initError = "Firebase configuration is empty or missing. Please add the FIREBASE_CONFIG_JSON environment variable in your Vercel Dashboard.";
+    console.warn(initError);
+  }
+} catch (e: any) {
+  initError = e.message || String(e);
+  console.error('[Firebase Init Error]', e);
+}
+
+export const getFirebaseInitError = (): string | null => {
+  return initError;
+};
 
 let isSigningIn = false;
 let cachedAccessToken: string | null = null;
@@ -14,6 +33,10 @@ export const initAuth = (
   onAuthSuccess?: (user: User, token: string) => void,
   onAuthFailure?: () => void
 ) => {
+  if (!auth) {
+    if (onAuthFailure) onAuthFailure();
+    return () => {};
+  }
   return onAuthStateChanged(auth, async (user: User | null) => {
     if (user) {
       if (cachedAccessToken) {
@@ -30,6 +53,9 @@ export const initAuth = (
 };
 
 export const googleSignIn = async (): Promise<{ user: User; accessToken: string } | null> => {
+  if (!auth || !provider) {
+    throw new Error('Firebase Auth is not initialized. Please configure FIREBASE_CONFIG_JSON in Vercel.');
+  }
   try {
     isSigningIn = true;
     const result = await signInWithPopup(auth, provider);
@@ -53,6 +79,7 @@ export const getAccessToken = (): string | null => {
 };
 
 export const logout = async () => {
+  if (!auth) return;
   await auth.signOut();
   cachedAccessToken = null;
 };
