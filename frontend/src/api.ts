@@ -1,6 +1,18 @@
 import { User, StudentProfile, CompanyProfile, Job, Application, Interview, AnalyticsStats, Department, Notification } from './types.ts';
 
-const API_BASE = import.meta.env.VITE_API_URL || '/api';
+const getApiBase = (): string => {
+  const envUrl = import.meta.env.VITE_API_URL;
+  if (!envUrl) {
+    return '/api';
+  }
+  // If the user specified a custom URL but did not include '/api' at the end, append it
+  if (!envUrl.endsWith('/api') && !envUrl.endsWith('/api/')) {
+    return envUrl.endsWith('/') ? `${envUrl}api` : `${envUrl}/api`;
+  }
+  return envUrl;
+};
+
+const API_BASE = getApiBase();
 
 // Retrieve token/userId from localStorage
 export function getSavedToken(): string | null {
