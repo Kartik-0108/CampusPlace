@@ -83,6 +83,11 @@ export const api = {
   getMe: () =>
     request<{ success: boolean; user: User; profile: any }>('/auth/me'),
 
+  deleteAccount: () =>
+    request<{ success: boolean }>('/auth/delete-account', {
+      method: 'DELETE',
+    }),
+
   // Departments
   getDepartments: () =>
     request<{ success: boolean; departments: Department[] }>('/departments'),

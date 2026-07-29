@@ -154,6 +154,44 @@ async function startServer() {
     res.json({ success: true, user, profile });
   });
 
+  // DELETE Auth Account (cascade delete user and all profiles/data)
+  app.delete('/api/auth/delete-account', (req, res) => {
+    const user = getAuthUser(req);
+    if (!user) {
+      res.status(401).json({ success: false, message: 'Unauthorized' });
+      return;
+    }
+
+    dbState = loadDatabase();
+
+    // 1. Remove from users
+    dbState.users = dbState.users.filter(u => u.id !== user.id);
+
+    // 2. Cascade delete based on role
+    if (user.role === 'student') {
+      dbState.students = dbState.students.filter(s => s.userId !== user.id);
+      dbState.applications = dbState.applications.filter(a => a.studentId !== user.id);
+      dbState.interviews = dbState.interviews.filter(i => i.studentId !== user.id);
+    } else if (user.role === 'company') {
+      // Find company jobs
+      const companyJobs = dbState.jobs.filter(j => j.companyId === user.id);
+      const companyJobIds = companyJobs.map(j => j.id);
+
+      dbState.companies = dbState.companies.filter(c => c.userId !== user.id);
+      dbState.jobs = dbState.jobs.filter(j => j.companyId !== user.id);
+      dbState.applications = dbState.applications.filter(a => !companyJobIds.includes(a.jobId));
+      dbState.interviews = dbState.interviews.filter(i => i.companyId !== user.id);
+    }
+
+    // 3. Remove user notifications
+    dbState.notifications = dbState.notifications.filter(n => n.userId !== user.id);
+
+    // Save database
+    saveDatabase(dbState);
+
+    res.json({ success: true, message: 'Account deleted successfully' });
+  });
+
   // GET Students (Admin can list all, filter by criteria)
   app.get('/api/students', (req, res) => {
     const user = getAuthUser(req);

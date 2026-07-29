@@ -10,7 +10,7 @@ import NotificationBell from './components/NotificationBell.tsx';
 import MainframeLoading from './components/MainframeLoading.tsx';
 import ThemeTransition from './components/ThemeTransition.tsx';
 import { getFirebaseInitError } from './services/gmail.ts';
-import { LogOut, Shield, BookOpen, Building, RefreshCw, Sparkles, Sliders, ArrowRight, Sun, Moon, GraduationCap } from 'lucide-react';
+import { LogOut, Shield, BookOpen, Building, RefreshCw, Sparkles, Sliders, ArrowRight, Sun, Moon, GraduationCap, UserX } from 'lucide-react';
 import { motion } from 'motion/react';
 
 export default function App() {
@@ -94,6 +94,35 @@ export default function App() {
   const handleLogout = () => {
     removeToken();
     setUser(null);
+  };
+
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [deleteConfirmationText, setDeleteConfirmationText] = useState('');
+  const [deleteError, setDeleteError] = useState('');
+  const [isDeleting, setIsDeleting] = useState(false);
+
+  const handleDeleteAccount = async () => {
+    if (deleteConfirmationText !== 'DELETE') {
+      setDeleteError("Please type 'DELETE' to confirm.");
+      return;
+    }
+    setIsDeleting(true);
+    setDeleteError('');
+    try {
+      const res = await api.deleteAccount();
+      if (res.success) {
+        removeToken();
+        setUser(null);
+        setShowDeleteModal(false);
+        setDeleteConfirmationText('');
+      } else {
+        setDeleteError('Failed to delete account. Please try again.');
+      }
+    } catch (err: any) {
+      setDeleteError(err.message || 'An error occurred. Please try again.');
+    } finally {
+      setIsDeleting(false);
+    }
   };
 
   const handleSandboxSwitch = (userId: string) => {
@@ -244,6 +273,19 @@ export default function App() {
             </div>
 
             <button
+              id="delete_account_btn"
+              onClick={() => {
+                setDeleteConfirmationText('');
+                setDeleteError('');
+                setShowDeleteModal(true);
+              }}
+              className="p-1.5 text-rose-500 hover:text-rose-300 hover:bg-rose-950/40 rounded transition-colors border border-transparent hover:border-rose-500/20 mr-1"
+              title="Delete Account"
+            >
+              <UserX size={16} />
+            </button>
+
+            <button
               id="logout_btn"
               onClick={handleLogout}
               className="p-1.5 text-emerald-500 hover:text-emerald-300 hover:bg-emerald-950/40 rounded transition-colors border border-transparent hover:border-emerald-500/20"
@@ -287,6 +329,60 @@ export default function App() {
           </div>
         </div>
       </footer>
+
+      {showDeleteModal && (
+        <div className="fixed inset-0 bg-black/80 flex items-center justify-center p-4 z-50 backdrop-blur-sm">
+          <div className="bg-white theme-light:bg-white text-slate-900 border border-slate-200 rounded-lg shadow-xl max-w-md w-full p-6 space-y-6 relative not-theme-light:bg-slate-950 not-theme-light:text-slate-100 not-theme-light:border-emerald-500/30">
+            <div className="space-y-2">
+              <h3 className="text-xl font-bold text-rose-600 flex items-center gap-2">
+                <UserX size={24} />
+                Delete Account Permanently
+              </h3>
+              <p className="text-sm text-slate-500 not-theme-light:text-slate-400">
+                This action is entirely irreversible. Deleting your account will permanently remove your profile, applications, posted jobs, and all other associated data from our systems.
+              </p>
+            </div>
+
+            <div className="space-y-4">
+              <label className="block text-xs font-semibold uppercase tracking-wider text-slate-600 not-theme-light:text-slate-400">
+                Type <span className="font-mono text-rose-600 font-bold bg-rose-50 px-1 py-0.5 rounded">DELETE</span> to confirm:
+              </label>
+              <input
+                type="text"
+                value={deleteConfirmationText}
+                onChange={(e) => setDeleteConfirmationText(e.target.value)}
+                placeholder="DELETE"
+                className="w-full bg-white text-slate-900 border border-slate-300 rounded-md p-2 shadow-sm focus:border-rose-500 focus:ring-rose-500 text-sm font-mono tracking-widest uppercase"
+                disabled={isDeleting}
+              />
+              {deleteError && (
+                <p className="text-xs text-rose-600 font-medium">
+                  ⚠️ {deleteError}
+                </p>
+              )}
+            </div>
+
+            <div className="flex gap-3 justify-end pt-4 border-t border-slate-100 not-theme-light:border-emerald-500/10">
+              <button
+                type="button"
+                onClick={() => setShowDeleteModal(false)}
+                className="px-4 py-2 text-sm font-medium text-slate-700 bg-slate-100 hover:bg-slate-200 rounded-md transition-colors not-theme-light:bg-emerald-950/40 not-theme-light:text-emerald-400 not-theme-light:hover:bg-emerald-900/30"
+                disabled={isDeleting}
+              >
+                Cancel
+              </button>
+              <button
+                type="button"
+                onClick={handleDeleteAccount}
+                className="px-4 py-2 text-sm font-medium text-white bg-rose-600 hover:bg-rose-700 rounded-md transition-colors shadow-sm flex items-center gap-2"
+                disabled={isDeleting || deleteConfirmationText !== 'DELETE'}
+              >
+                {isDeleting ? 'Deleting...' : 'Delete Permanently'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
     </div>
   );
