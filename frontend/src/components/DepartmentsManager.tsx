@@ -77,7 +77,7 @@ export default function DepartmentsManager() {
               value={name}
               onChange={(e) => setName(e.target.value)}
               placeholder="e.g. Artificial Intelligence & Data Science"
-              className="w-full border-slate-200 rounded-md shadow-sm focus:border-indigo-500 focus:ring-indigo-500 text-sm"
+              className="w-full bg-white text-slate-900 border border-slate-300 rounded-md shadow-sm focus:border-indigo-500 focus:ring-indigo-500 text-sm p-2"
               required
             />
           </div>
@@ -88,7 +88,7 @@ export default function DepartmentsManager() {
               value={code}
               onChange={(e) => setCode(e.target.value)}
               placeholder="e.g. AI&DS"
-              className="w-full border-slate-200 rounded-md shadow-sm focus:border-indigo-500 focus:ring-indigo-500 text-sm"
+              className="w-full bg-white text-slate-900 border border-slate-300 rounded-md shadow-sm focus:border-indigo-500 focus:ring-indigo-500 text-sm p-2"
               required
             />
           </div>

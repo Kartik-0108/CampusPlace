@@ -295,27 +295,27 @@ export default function JobDriveManager() {
         <form onSubmit={handleSubmit} className="bg-white p-6 rounded-lg border border-slate-200 shadow-sm space-y-6">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div className="space-y-4">
-              <h3 className="text-lg font-semibold border-b pb-2">Company Details</h3>
-              <div><label className="text-sm font-medium">Company Name</label><input required className="w-full mt-1 border-slate-200 rounded-md" value={formData.companyName} onChange={e=>setFormData({...formData, companyName: e.target.value})} /></div>
-              <div><label className="text-sm font-medium">Company Logo URL</label><input className="w-full mt-1 border-slate-200 rounded-md" value={formData.companyLogo} onChange={e=>setFormData({...formData, companyLogo: e.target.value})} /></div>
-              <div><label className="text-sm font-medium">HR Contact Email/Phone</label><input className="w-full mt-1 border-slate-200 rounded-md" value={formData.hrContact} onChange={e=>setFormData({...formData, hrContact: e.target.value})} /></div>
+              <h3 className="text-lg font-semibold border-b pb-2 text-slate-900">Company Details</h3>
+              <div><label className="text-sm font-medium text-slate-700">Company Name</label><input required className="w-full mt-1 bg-white text-slate-900 border border-slate-300 rounded-md p-2 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 text-sm" value={formData.companyName} onChange={e=>setFormData({...formData, companyName: e.target.value})} /></div>
+              <div><label className="text-sm font-medium text-slate-700">Company Logo URL</label><input className="w-full mt-1 bg-white text-slate-900 border border-slate-300 rounded-md p-2 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 text-sm" value={formData.companyLogo} onChange={e=>setFormData({...formData, companyLogo: e.target.value})} /></div>
+              <div><label className="text-sm font-medium text-slate-700">HR Contact Email/Phone</label><input className="w-full mt-1 bg-white text-slate-900 border border-slate-300 rounded-md p-2 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 text-sm" value={formData.hrContact} onChange={e=>setFormData({...formData, hrContact: e.target.value})} /></div>
             </div>
 
             <div className="space-y-4">
-              <h3 className="text-lg font-semibold border-b pb-2">Role Details</h3>
-              <div><label className="text-sm font-medium">Job Role</label><input required className="w-full mt-1 border-slate-200 rounded-md" value={formData.title} onChange={e=>setFormData({...formData, title: e.target.value})} /></div>
+              <h3 className="text-lg font-semibold border-b pb-2 text-slate-900">Role Details</h3>
+              <div><label className="text-sm font-medium text-slate-700">Job Role</label><input required className="w-full mt-1 bg-white text-slate-900 border border-slate-300 rounded-md p-2 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 text-sm" value={formData.title} onChange={e=>setFormData({...formData, title: e.target.value})} /></div>
               <div className="grid grid-cols-2 gap-4">
-                <div><label className="text-sm font-medium">Job Type</label>
-                  <select className="w-full mt-1 border-slate-200 rounded-md" value={formData.jobType} onChange={e=>setFormData({...formData, jobType: e.target.value as any})}>
+                <div><label className="text-sm font-medium text-slate-700">Job Type</label>
+                  <select className="w-full mt-1 bg-white text-slate-900 border border-slate-300 rounded-md p-2 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 text-sm" value={formData.jobType} onChange={e=>setFormData({...formData, jobType: e.target.value as any})}>
                     <option>Full-Time</option><option>Internship</option><option>Intern + Full-Time</option>
                   </select>
                 </div>
-                <div><label className="text-sm font-medium">Package (LPA)</label><input type="number" step="0.1" required className="w-full mt-1 border-slate-200 rounded-md" value={formData.packageAmount} onChange={e=>setFormData({...formData, packageAmount: parseFloat(e.target.value)})} /></div>
+                <div><label className="text-sm font-medium text-slate-700">Package (LPA)</label><input type="number" step="0.1" required className="w-full mt-1 bg-white text-slate-900 border border-slate-300 rounded-md p-2 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 text-sm" value={formData.packageAmount} onChange={e=>setFormData({...formData, packageAmount: parseFloat(e.target.value)})} /></div>
               </div>
               <div className="grid grid-cols-2 gap-4">
-                <div><label className="text-sm font-medium">Location</label><input required className="w-full mt-1 border-slate-200 rounded-md" value={formData.location} onChange={e=>setFormData({...formData, location: e.target.value})} /></div>
-                <div><label className="text-sm font-medium">Work Mode</label>
-                  <select className="w-full mt-1 border-slate-200 rounded-md" value={formData.workMode} onChange={e=>setFormData({...formData, workMode: e.target.value as any})}>
+                <div><label className="text-sm font-medium text-slate-700">Location</label><input required className="w-full mt-1 bg-white text-slate-900 border border-slate-300 rounded-md p-2 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 text-sm" value={formData.location} onChange={e=>setFormData({...formData, location: e.target.value})} /></div>
+                <div><label className="text-sm font-medium text-slate-700">Work Mode</label>
+                  <select className="w-full mt-1 bg-white text-slate-900 border border-slate-300 rounded-md p-2 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 text-sm" value={formData.workMode} onChange={e=>setFormData({...formData, workMode: e.target.value as any})}>
                     <option>On-Site</option><option>Remote</option><option>Hybrid</option>
                   </select>
                 </div>
@@ -323,16 +323,16 @@ export default function JobDriveManager() {
             </div>
             
             <div className="space-y-4 md:col-span-2">
-              <h3 className="text-lg font-semibold border-b pb-2">Description & Eligibility</h3>
-              <div><label className="text-sm font-medium">Job Description</label><textarea required rows={3} className="w-full mt-1 border-slate-200 rounded-md" value={formData.description} onChange={e=>setFormData({...formData, description: e.target.value})} /></div>
+              <h3 className="text-lg font-semibold border-b pb-2 text-slate-900">Description & Eligibility</h3>
+              <div><label className="text-sm font-medium text-slate-700">Job Description</label><textarea required rows={3} className="w-full mt-1 bg-white text-slate-900 border border-slate-300 rounded-md p-2 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 text-sm" value={formData.description} onChange={e=>setFormData({...formData, description: e.target.value})} /></div>
               <div className="grid grid-cols-3 gap-4">
-                <div><label className="text-sm font-medium">Min CGPA</label><input type="number" step="0.1" required className="w-full mt-1 border-slate-200 rounded-md" value={formData.cgpaCutoff} onChange={e=>setFormData({...formData, cgpaCutoff: parseFloat(e.target.value)})} /></div>
-                <div><label className="text-sm font-medium">Max Backlogs</label><input type="number" required className="w-full mt-1 border-slate-200 rounded-md" value={formData.backlogsAllowed} onChange={e=>setFormData({...formData, backlogsAllowed: parseInt(e.target.value)})} /></div>
-                <div><label className="text-sm font-medium">Deadline</label><input type="date" required className="w-full mt-1 border-slate-200 rounded-md" value={formData.lastDateToApply} onChange={e=>setFormData({...formData, lastDateToApply: e.target.value})} /></div>
+                <div><label className="text-sm font-medium text-slate-700">Min CGPA</label><input type="number" step="0.1" required className="w-full mt-1 bg-white text-slate-900 border border-slate-300 rounded-md p-2 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 text-sm" value={formData.cgpaCutoff} onChange={e=>setFormData({...formData, cgpaCutoff: parseFloat(e.target.value)})} /></div>
+                <div><label className="text-sm font-medium text-slate-700">Max Backlogs</label><input type="number" required className="w-full mt-1 bg-white text-slate-900 border border-slate-300 rounded-md p-2 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 text-sm" value={formData.backlogsAllowed} onChange={e=>setFormData({...formData, backlogsAllowed: parseInt(e.target.value)})} /></div>
+                <div><label className="text-sm font-medium text-slate-700">Deadline</label><input type="date" required className="w-full mt-1 bg-white text-slate-900 border border-slate-300 rounded-md p-2 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 text-sm" value={formData.lastDateToApply} onChange={e=>setFormData({...formData, lastDateToApply: e.target.value})} /></div>
               </div>
               
               <div>
-                <label className="text-sm font-medium mb-2 block">Allowed Departments (Leave empty to allow all)</label>
+                <label className="text-sm font-medium mb-2 block text-slate-700">Allowed Departments (Leave empty to allow all)</label>
                 <div className="flex flex-wrap gap-2">
                   {departments.map(dept => (
                     <label key={dept.id} className={`flex items-center gap-2 p-2 border rounded-md cursor-pointer text-sm ${formData.allowedDepartments?.includes(dept.id) ? 'bg-indigo-50 border-indigo-200 text-indigo-700' : 'bg-white border-slate-200'}`}>
@@ -346,8 +346,8 @@ export default function JobDriveManager() {
             
             <div className="space-y-4 md:col-span-2 flex justify-between items-center border-t pt-4">
                <div>
-                  <label className="text-sm font-medium mr-3">Status</label>
-                  <select className="border-slate-200 rounded-md text-sm font-medium" value={formData.status} onChange={e=>setFormData({...formData, status: e.target.value as any})}>
+                  <label className="text-sm font-medium mr-3 text-slate-700">Status</label>
+                  <select className="bg-white text-slate-900 border border-slate-300 rounded-md p-2 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 text-sm font-medium" value={formData.status} onChange={e=>setFormData({...formData, status: e.target.value as any})}>
                     <option value="Draft">Draft</option>
                     <option value="Open">Published (Open)</option>
                     <option value="Closed">Closed</option>
