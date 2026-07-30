@@ -327,8 +327,8 @@ export default function AdminDashboard() {
     
     return matchesSearch && matchesDept && matchesStatus && matchesCgpa && matchesBacklogs && matchesSkill;
   }).sort((a, b) => {
-    let valA: any = a.name;
-    let valB: any = b.name;
+    let valA: any;
+    let valB: any;
 
     if (sortByField === 'cgpa') {
       valA = a.cgpa;
@@ -339,6 +339,12 @@ export default function AdminDashboard() {
     } else if (sortByField === 'backlogs') {
       valA = a.backlogs;
       valB = b.backlogs;
+    } else if (sortByField === 'rollNumber') {
+      valA = a.rollNumber;
+      valB = b.rollNumber;
+    } else {
+      valA = a.name;
+      valB = b.name;
     }
 
     if (typeof valA === 'string') {
@@ -1010,8 +1016,21 @@ export default function AdminDashboard() {
                         onClick={() => handleSort('name')}
                       >
                         <div className="flex items-center gap-1.5">
-                          <span>Student & Roll</span>
+                          <span>Student Name</span>
                           {sortByField === 'name' ? (
+                            sortOrder === 'asc' ? <ArrowUp size={13} className="text-indigo-600" /> : <ArrowDown size={13} className="text-indigo-600" />
+                          ) : (
+                            <ArrowUp size={13} className="text-slate-300 opacity-50" />
+                          )}
+                        </div>
+                      </th>
+                      <th 
+                        className="py-3.5 px-6 font-semibold cursor-pointer select-none hover:bg-slate-100/60 transition-colors"
+                        onClick={() => handleSort('rollNumber')}
+                      >
+                        <div className="flex items-center gap-1.5">
+                          <span>Roll Number</span>
+                          {sortByField === 'rollNumber' ? (
                             sortOrder === 'asc' ? <ArrowUp size={13} className="text-indigo-600" /> : <ArrowDown size={13} className="text-indigo-600" />
                           ) : (
                             <ArrowUp size={13} className="text-slate-300 opacity-50" />
@@ -1068,19 +1087,21 @@ export default function AdminDashboard() {
                       <tr key={student.userId} className="hover:bg-slate-50/60 transition-colors">
                         <td className="py-3.5 px-6">
                           <div className="flex items-center gap-3">
-                            <div className="w-8 h-8 rounded-full bg-slate-100 flex items-center justify-center font-semibold text-slate-600 text-xs uppercase shadow-2xs">
+                            <div className="w-8 h-8 rounded-full bg-indigo-50 text-indigo-700 flex items-center justify-center font-bold text-xs uppercase shadow-xs">
                               {student.name.charAt(0)}
                             </div>
-                            <div>
-                              <button 
-                                onClick={() => setViewingStudent(student)} 
-                                className="font-semibold text-indigo-600 hover:text-indigo-800 text-left transition-colors block cursor-pointer"
-                              >
-                                {student.name}
-                              </button>
-                              <span className="text-xs text-slate-400 font-mono block mt-0.5">{student.rollNumber}</span>
-                            </div>
+                            <button 
+                              onClick={() => setViewingStudent(student)} 
+                              className="font-semibold text-slate-800 hover:text-indigo-600 text-left transition-colors block cursor-pointer"
+                            >
+                              {student.name}
+                            </button>
                           </div>
+                        </td>
+                        <td className="py-3.5 px-6">
+                          <span className="font-mono text-xs font-semibold px-2.5 py-1 bg-slate-100 text-slate-600 border border-slate-200/50 rounded-md tracking-wider">
+                            {student.rollNumber}
+                          </span>
                         </td>
                         <td className="py-3.5 px-6 text-slate-600 font-medium">{student.department}</td>
                         <td className="py-3.5 px-6 text-center font-semibold text-slate-900">{student.cgpa.toFixed(2)}</td>
@@ -1140,7 +1161,7 @@ export default function AdminDashboard() {
                     ))}
                     {filteredStudents.length === 0 && (
                       <tr>
-                        <td colSpan={8} className="text-center py-16 text-slate-400 text-sm font-medium">
+                        <td colSpan={9} className="text-center py-16 text-slate-400 text-sm font-medium">
                           No profiles matching your search or filters were found. Try resetting the criteria.
                         </td>
                       </tr>
