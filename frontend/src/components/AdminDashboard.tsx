@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
-import { AnalyticsStats, CompanyProfile, StudentProfile, Job } from '../types.ts';
+import { AnalyticsStats, CompanyProfile, StudentProfile, Job, Department } from '../types.ts';
 import { api } from '../api.ts';
-import { Shield, Users, Building, Sparkles, Briefcase, RefreshCw, Check, AlertCircle, TrendingUp, BarChart as BarChartIcon, User, Layers, Search, CheckCircle, Clock, Award, Download, Printer } from 'lucide-react';
+import { Shield, Users, Building, Sparkles, Briefcase, RefreshCw, Check, AlertCircle, TrendingUp, BarChart as BarChartIcon, User, Layers, Search, CheckCircle, Clock, Award, Download, Printer, ArrowUp, ArrowDown, Filter, X, SlidersHorizontal } from 'lucide-react';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, Cell, PieChart, Pie } from 'recharts';
 import { motion } from 'motion/react';
 import { GlowCard } from './ui/spotlight-card.tsx';
@@ -38,6 +38,13 @@ export default function AdminDashboard() {
   const [studentSearch, setStudentSearch] = useState('');
   const [selectedDept, setSelectedDept] = useState('All');
   const [selectedStatus, setSelectedStatus] = useState('All');
+  const [departments, setDepartments] = useState<Department[]>([]);
+  const [minCgpaFilter, setMinCgpaFilter] = useState<number>(0);
+  const [maxBacklogsFilter, setMaxBacklogsFilter] = useState<string>('All');
+  const [selectedSkillFilter, setSelectedSkillFilter] = useState<string>('All');
+  const [sortByField, setSortByField] = useState<string>('name');
+  const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('asc');
+  const [showAdvancedFilters, setShowAdvancedFilters] = useState(false);
 
   // Sub tab view
   const [activeTab, setActiveTab] = useState<'overview' | 'companies' | 'students' | 'drives' | 'departments' | 'calendar'>('overview');
@@ -68,6 +75,11 @@ export default function AdminDashboard() {
       const iRes = await api.getInterviews();
       if (iRes.success) {
         setInterviews(iRes.interviews);
+      }
+
+      const dRes = await api.getDepartments();
+      if (dRes.success) {
+        setDepartments(dRes.departments);
       }
     } catch (err: any) {
       setError(err.message || 'Failed to load placement reports.');
@@ -289,16 +301,80 @@ export default function AdminDashboard() {
     );
   }
 
-  // Filter students
+  // Filter and sort students
   const filteredStudents = students.filter(s => {
     const matchesSearch = s.name.toLowerCase().includes(studentSearch.toLowerCase()) ||
                           s.rollNumber.toLowerCase().includes(studentSearch.toLowerCase()) ||
                           s.skills.some(sk => sk.toLowerCase().includes(studentSearch.toLowerCase()));
-    const matchesDept = selectedDept === 'All' || s.department === selectedDept;
+    const matchesDept = selectedDept === 'All' || s.department === selectedDept || s.departmentId === selectedDept;
     const matchesStatus = selectedStatus === 'All' || s.placedStatus === selectedStatus;
     
-    return matchesSearch && matchesDept && matchesStatus;
+    // CGPA filter
+    const matchesCgpa = s.cgpa >= minCgpaFilter;
+    
+    // Backlogs filter
+    let matchesBacklogs = true;
+    if (maxBacklogsFilter === '0') {
+      matchesBacklogs = s.backlogs === 0;
+    } else if (maxBacklogsFilter === '1') {
+      matchesBacklogs = s.backlogs <= 1;
+    } else if (maxBacklogsFilter === '2') {
+      matchesBacklogs = s.backlogs <= 2;
+    }
+    
+    // Skill filter
+    const matchesSkill = selectedSkillFilter === 'All' || s.skills.some(sk => sk.toLowerCase() === selectedSkillFilter.toLowerCase());
+    
+    return matchesSearch && matchesDept && matchesStatus && matchesCgpa && matchesBacklogs && matchesSkill;
+  }).sort((a, b) => {
+    let valA: any = a.name;
+    let valB: any = b.name;
+
+    if (sortByField === 'cgpa') {
+      valA = a.cgpa;
+      valB = b.cgpa;
+    } else if (sortByField === 'package') {
+      valA = a.placementPackage || 0;
+      valB = b.placementPackage || 0;
+    } else if (sortByField === 'backlogs') {
+      valA = a.backlogs;
+      valB = b.backlogs;
+    }
+
+    if (typeof valA === 'string') {
+      return sortOrder === 'asc' ? valA.localeCompare(valB) : valB.localeCompare(valA);
+    } else {
+      return sortOrder === 'asc' ? valA - valB : valB - valA;
+    }
   });
+
+  const allUniqueSkills = Array.from(
+    new Set(students.flatMap(s => s.skills || []))
+  ).sort();
+
+  const handleSort = (field: string) => {
+    if (sortByField === field) {
+      setSortOrder(prev => prev === 'asc' ? 'desc' : 'asc');
+    } else {
+      setSortByField(field);
+      if (field === 'cgpa' || field === 'package') {
+        setSortOrder('desc');
+      } else {
+        setSortOrder('asc');
+      }
+    }
+  };
+
+  const handleResetFilters = () => {
+    setStudentSearch('');
+    setSelectedDept('All');
+    setSelectedStatus('All');
+    setMinCgpaFilter(0);
+    setMaxBacklogsFilter('All');
+    setSelectedSkillFilter('All');
+    setSortByField('name');
+    setSortOrder('asc');
+  };
 
   // Recharts color palette
   const COLORS = ['#4f46e5', '#10b981', '#f59e0b', '#ef4444', '#3b82f6'];
@@ -694,141 +770,384 @@ export default function AdminDashboard() {
 
         {/* STUDENTS DIRECTORY */}
         {activeTab === 'students' && (
-          <div className="bg-white rounded-lg border border-slate-200 shadow-sm overflow-hidden">
+          <div className="space-y-6">
             
-            {/* Search and Filters panel */}
-            <div className="p-5 border-b border-slate-200 bg-slate-50 flex flex-col md:flex-row gap-3 md:items-center">
-              <div className="relative flex-1">
-                <Search size={16} className="absolute left-3 top-2.5 text-slate-400" />
-                <input
-                  type="text"
-                  placeholder="Search students by name, roll, skills..."
-                  value={studentSearch}
-                  onChange={(e) => setStudentSearch(e.target.value)}
-                  className="w-full pl-9 pr-4 py-2 border border-slate-300 bg-white rounded-md text-sm outline-none focus:ring-2 focus:ring-slate-900 focus:border-slate-900 transition-colors text-slate-900"
-                />
+            {/* Real-time Dynamic Stats Summary */}
+            <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+              <div className="bg-white p-5 rounded-xl border border-slate-200 shadow-sm">
+                <div className="flex items-center justify-between">
+                  <span className="text-xs font-semibold text-slate-500 uppercase tracking-wider">Matching Students</span>
+                  <div className="p-1.5 bg-slate-50 rounded text-slate-400">
+                    <Users size={16} />
+                  </div>
+                </div>
+                <div className="flex items-baseline gap-2 mt-2">
+                  <span className="text-2xl font-bold text-slate-800">{filteredStudents.length}</span>
+                  <span className="text-xs text-slate-500">of {students.length} total</span>
+                </div>
+              </div>
+              
+              <div className="bg-white p-5 rounded-xl border border-slate-200 shadow-sm">
+                <div className="flex items-center justify-between">
+                  <span className="text-xs font-semibold text-slate-500 uppercase tracking-wider">Placement Rate</span>
+                  <div className="p-1.5 bg-emerald-50 rounded text-emerald-500">
+                    <TrendingUp size={16} />
+                  </div>
+                </div>
+                <div className="flex items-baseline gap-2 mt-2">
+                  <span className="text-2xl font-bold text-emerald-600">
+                    {filteredStudents.length > 0 
+                      ? Math.round((filteredStudents.filter(s => s.placedStatus === 'Placed').length / filteredStudents.length) * 100) 
+                      : 0}%
+                  </span>
+                  <span className="text-xs text-slate-500">
+                    {filteredStudents.filter(s => s.placedStatus === 'Placed').length} placed
+                  </span>
+                </div>
               </div>
 
-              <div className="flex items-center flex-wrap gap-3">
-                <select
-                  value={selectedDept}
-                  onChange={(e) => setSelectedDept(e.target.value)}
-                  className="text-sm border border-slate-300 rounded-md px-3 py-2 bg-white text-slate-700 font-medium outline-none focus:ring-2 focus:ring-slate-900"
-                >
-                  <option value="All">All Departments</option>
-                  <option value="Computer Science">Computer Science</option>
-                  <option value="Information Technology">Information Technology</option>
-                  <option value="Electronics">Electronics</option>
-                  <option value="Mechanical">Mechanical</option>
-                  <option value="Civil">Civil</option>
-                </select>
+              <div className="bg-white p-5 rounded-xl border border-slate-200 shadow-sm">
+                <div className="flex items-center justify-between">
+                  <span className="text-xs font-semibold text-slate-500 uppercase tracking-wider">Average Package</span>
+                  <div className="p-1.5 bg-indigo-50 rounded text-indigo-500">
+                    <Award size={16} />
+                  </div>
+                </div>
+                <div className="flex items-baseline gap-2 mt-2">
+                  <span className="text-2xl font-bold text-indigo-600">
+                    {(() => {
+                      const placedList = filteredStudents.filter(s => s.placedStatus === 'Placed' && s.placementPackage);
+                      if (placedList.length === 0) return '0.0';
+                      const avg = placedList.reduce((acc, curr) => acc + (curr.placementPackage || 0), 0) / placedList.length;
+                      return avg.toFixed(1);
+                    })()} LPA
+                  </span>
+                  <span className="text-xs text-slate-500">placed subset</span>
+                </div>
+              </div>
 
-                <select
-                  value={selectedStatus}
-                  onChange={(e) => setSelectedStatus(e.target.value)}
-                  className="text-sm border border-slate-300 rounded-md px-3 py-2 bg-white text-slate-700 font-medium outline-none focus:ring-2 focus:ring-slate-900"
-                >
-                  <option value="All">All Status</option>
-                  <option value="Placed">Placed</option>
-                  <option value="Unplaced">Unplaced</option>
-                </select>
-
-                <div className="h-6 w-px bg-slate-200 hidden md:block" />
-
-                <button
-                  onClick={exportStudentsToCSV}
-                  className="bg-emerald-600 hover:bg-emerald-700 text-white font-medium text-xs py-2 px-3 rounded-md transition-all flex items-center gap-1.5 shadow-sm active:scale-[0.98] cursor-pointer"
-                  title="Export current filtered list to Excel/CSV"
-                >
-                  <Download size={14} />
-                  <span>Export CSV</span>
-                </button>
-
-                <button
-                  onClick={exportStudentsToPDF}
-                  className="bg-indigo-600 hover:bg-indigo-700 text-white font-medium text-xs py-2 px-3 rounded-md transition-all flex items-center gap-1.5 shadow-sm active:scale-[0.98] cursor-pointer"
-                  title="Generate beautiful placement directory PDF report"
-                >
-                  <Printer size={14} />
-                  <span>Print Report (PDF)</span>
-                </button>
+              <div className="bg-white p-5 rounded-xl border border-slate-200 shadow-sm">
+                <div className="flex items-center justify-between">
+                  <span className="text-xs font-semibold text-slate-500 uppercase tracking-wider">Highest Package</span>
+                  <div className="p-1.5 bg-rose-50 rounded text-rose-500">
+                    <Sparkles size={16} />
+                  </div>
+                </div>
+                <div className="flex items-baseline gap-2 mt-2">
+                  <span className="text-2xl font-bold text-rose-600">
+                    {(() => {
+                      const packages = filteredStudents.filter(s => s.placedStatus === 'Placed' && s.placementPackage).map(s => s.placementPackage || 0);
+                      return packages.length > 0 ? Math.max(...packages).toFixed(1) : '0.0';
+                    })()} LPA
+                  </span>
+                  <span className="text-xs text-slate-500">maximum offer</span>
+                </div>
               </div>
             </div>
 
-            {/* Students Table */}
-            <div className="overflow-x-auto [overflow-x-auto::-webkit-scrollbar]:hidden">
-              <table className="w-full text-left text-sm border-collapse">
-                <thead>
-                  <tr className="border-b border-slate-200 text-slate-500 font-medium bg-slate-50">
-                    <th className="py-3 px-6 font-medium">Roll & Student</th>
-                    <th className="py-3 px-6 font-medium">Department</th>
-                    <th className="py-3 px-6 text-center font-medium">CGPA</th>
-                    <th className="py-3 px-6 font-medium">Skills</th>
-                    <th className="py-3 px-6 text-center font-medium">Status</th>
-                    <th className="py-3 px-6 text-center font-medium">Resume</th>
-                    <th className="py-3 px-6 text-right font-medium">Offer LPA</th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-slate-100">
-                  {filteredStudents.map(student => (
-                    <tr key={student.userId} className="hover:bg-slate-50 transition-colors">
-                      <td className="py-3 px-6">
-                        <div className="flex items-center gap-3">
-                          <div className="w-8 h-8 rounded-full bg-slate-100 flex items-center justify-center font-semibold text-slate-600 text-xs uppercase">
-                            {student.name.charAt(0)}
-                          </div>
-                          <div>
-                            <button onClick={() => setViewingStudent(student)} className="font-medium text-indigo-600 hover:text-indigo-800 text-left transition-colors block">
-                              {student.name}
-                            </button>
-                            <span className="text-xs text-slate-500 font-mono block">{student.rollNumber}</span>
-                          </div>
+            {/* Directory Control Center */}
+            <div className="bg-white rounded-lg border border-slate-200 shadow-sm overflow-hidden">
+              
+              {/* Primary Search & Filter Line */}
+              <div className="p-5 border-b border-slate-200 bg-slate-50/70 flex flex-col lg:flex-row gap-4 lg:items-center">
+                <div className="relative flex-1">
+                  <Search size={16} className="absolute left-3 top-3 text-slate-400" />
+                  <input
+                    type="text"
+                    placeholder="Search by student name, roll number, or skills..."
+                    value={studentSearch}
+                    onChange={(e) => setStudentSearch(e.target.value)}
+                    className="w-full pl-9 pr-4 py-2 border border-slate-300 bg-white rounded-md text-sm outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-colors text-slate-900 shadow-xs"
+                  />
+                </div>
+
+                <div className="flex flex-wrap items-center gap-3">
+                  <select
+                    value={selectedDept}
+                    onChange={(e) => setSelectedDept(e.target.value)}
+                    className="text-sm border border-slate-300 rounded-md px-3 py-2 bg-white text-slate-700 font-medium outline-none focus:ring-2 focus:ring-indigo-500 shadow-xs"
+                  >
+                    <option value="All">All Departments</option>
+                    {departments.map(dept => (
+                      <option key={dept.id} value={dept.name}>{dept.name} ({dept.code})</option>
+                    ))}
+                    {Array.from(new Set(students.map(s => s.department).filter(Boolean)))
+                      .filter(dName => !departments.some(dept => dept.name === dName))
+                      .map(dName => (
+                        <option key={dName} value={dName}>{dName}</option>
+                      ))
+                    }
+                  </select>
+
+                  <select
+                    value={selectedStatus}
+                    onChange={(e) => setSelectedStatus(e.target.value)}
+                    className="text-sm border border-slate-300 rounded-md px-3 py-2 bg-white text-slate-700 font-medium outline-none focus:ring-2 focus:ring-indigo-500 shadow-xs"
+                  >
+                    <option value="All">All Status</option>
+                    <option value="Placed">Placed</option>
+                    <option value="Unplaced">Unplaced</option>
+                  </select>
+
+                  <button
+                    onClick={() => setShowAdvancedFilters(!showAdvancedFilters)}
+                    className={`flex items-center gap-2 text-sm border px-3 py-2 rounded-md font-medium transition-colors cursor-pointer shadow-xs ${
+                      showAdvancedFilters || (minCgpaFilter > 0 || maxBacklogsFilter !== 'All' || selectedSkillFilter !== 'All')
+                        ? 'bg-indigo-50 border-indigo-200 text-indigo-700'
+                        : 'bg-white border-slate-300 text-slate-700 hover:bg-slate-50'
+                    }`}
+                  >
+                    <SlidersHorizontal size={14} />
+                    <span>Filters</span>
+                    {(minCgpaFilter > 0 || maxBacklogsFilter !== 'All' || selectedSkillFilter !== 'All') && (
+                      <span className="w-5 h-5 bg-indigo-600 text-white font-bold rounded-full text-xs flex items-center justify-center">
+                        {(minCgpaFilter > 0 ? 1 : 0) + (maxBacklogsFilter !== 'All' ? 1 : 0) + (selectedSkillFilter !== 'All' ? 1 : 0)}
+                      </span>
+                    )}
+                  </button>
+
+                  <div className="h-6 w-px bg-slate-200 hidden lg:block" />
+
+                  <div className="flex items-center gap-2">
+                    <button
+                      onClick={exportStudentsToCSV}
+                      className="bg-emerald-600 hover:bg-emerald-700 text-white font-medium text-xs py-2 px-3 rounded-md transition-all flex items-center gap-1.5 shadow-sm active:scale-[0.98] cursor-pointer"
+                      title="Export current filtered list to Excel/CSV"
+                    >
+                      <Download size={14} />
+                      <span>Export CSV</span>
+                    </button>
+
+                    <button
+                      onClick={exportStudentsToPDF}
+                      className="bg-indigo-600 hover:bg-indigo-700 text-white font-medium text-xs py-2 px-3 rounded-md transition-all flex items-center gap-1.5 shadow-sm active:scale-[0.98] cursor-pointer"
+                      title="Generate beautiful placement directory PDF report"
+                    >
+                      <Printer size={14} />
+                      <span>Print (PDF)</span>
+                    </button>
+                  </div>
+                </div>
+              </div>
+
+              {/* Advanced Filters Drawer Panel */}
+              {showAdvancedFilters && (
+                <div className="p-5 bg-slate-50/40 border-b border-slate-200 grid grid-cols-1 md:grid-cols-3 gap-5 animate-fadeIn">
+                  
+                  {/* Min CGPA Filter */}
+                  <div className="space-y-1.5">
+                    <label className="block text-xs font-semibold text-slate-500 uppercase tracking-wider">Minimum CGPA ({minCgpaFilter > 0 ? minCgpaFilter.toFixed(1) : 'Any'})</label>
+                    <select
+                      value={minCgpaFilter}
+                      onChange={(e) => setMinCgpaFilter(parseFloat(e.target.value))}
+                      className="w-full text-sm border border-slate-300 rounded-md px-3 py-2 bg-white text-slate-700 outline-none focus:ring-2 focus:ring-indigo-500 shadow-xs"
+                    >
+                      <option value="0">Any CGPA</option>
+                      <option value="6">6.0 & Above</option>
+                      <option value="6.5">6.5 & Above</option>
+                      <option value="7">7.0 & Above</option>
+                      <option value="7.5">7.5 & Above</option>
+                      <option value="8">8.0 & Above</option>
+                      <option value="8.5">8.5 & Above</option>
+                      <option value="9">9.0 & Above</option>
+                    </select>
+                  </div>
+
+                  {/* Backlogs Filter */}
+                  <div className="space-y-1.5">
+                    <label className="block text-xs font-semibold text-slate-500 uppercase tracking-wider">Backlog Status</label>
+                    <select
+                      value={maxBacklogsFilter}
+                      onChange={(e) => setMaxBacklogsFilter(e.target.value)}
+                      className="w-full text-sm border border-slate-300 rounded-md px-3 py-2 bg-white text-slate-700 outline-none focus:ring-2 focus:ring-indigo-500 shadow-xs"
+                    >
+                      <option value="All">All Backlog Statuses</option>
+                      <option value="0">Strictly No Active Backlogs</option>
+                      <option value="1">At Most 1 Backlog</option>
+                      <option value="2">At Most 2 Backlogs</option>
+                    </select>
+                  </div>
+
+                  {/* Dynamic Skill Filter */}
+                  <div className="space-y-1.5">
+                    <label className="block text-xs font-semibold text-slate-500 uppercase tracking-wider">Filter by Core Skill</label>
+                    <select
+                      value={selectedSkillFilter}
+                      onChange={(e) => setSelectedSkillFilter(e.target.value)}
+                      className="w-full text-sm border border-slate-300 rounded-md px-3 py-2 bg-white text-slate-700 outline-none focus:ring-2 focus:ring-indigo-500 shadow-xs"
+                    >
+                      <option value="All">All Skills</option>
+                      {allUniqueSkills.map(skill => (
+                        <option key={skill} value={skill}>{skill}</option>
+                      ))}
+                    </select>
+                  </div>
+
+                  {/* Filter Status Reset Actions */}
+                  <div className="md:col-span-3 flex justify-between items-center bg-white p-3 rounded-lg border border-slate-200">
+                    <span className="text-xs text-slate-500 font-medium">
+                      Showing <strong className="text-slate-700">{filteredStudents.length}</strong> of <strong className="text-slate-700">{students.length}</strong> profiles matching options.
+                    </span>
+                    <button
+                      type="button"
+                      onClick={handleResetFilters}
+                      className="text-xs font-semibold text-indigo-600 hover:text-indigo-800 flex items-center gap-1 transition-colors cursor-pointer"
+                    >
+                      <X size={14} />
+                      Reset All Filters
+                    </button>
+                  </div>
+                </div>
+              )}
+
+              {/* Enhanced Students Table with Column Header Toggles */}
+              <div className="overflow-x-auto [overflow-x-auto::-webkit-scrollbar]:hidden">
+                <table className="w-full text-left text-sm border-collapse">
+                  <thead>
+                    <tr className="border-b border-slate-200 text-slate-500 font-semibold bg-slate-50/50">
+                      <th 
+                        className="py-3.5 px-6 font-semibold cursor-pointer select-none hover:bg-slate-100/60 transition-colors"
+                        onClick={() => handleSort('name')}
+                      >
+                        <div className="flex items-center gap-1.5">
+                          <span>Student & Roll</span>
+                          {sortByField === 'name' ? (
+                            sortOrder === 'asc' ? <ArrowUp size={13} className="text-indigo-600" /> : <ArrowDown size={13} className="text-indigo-600" />
+                          ) : (
+                            <ArrowUp size={13} className="text-slate-300 opacity-50" />
+                          )}
                         </div>
-                      </td>
-                      <td className="py-3 px-6 text-slate-600">{student.department}</td>
-                      <td className="py-3 px-6 text-center font-medium text-slate-900">{student.cgpa}</td>
-                      <td className="py-3 px-6">
-                        <div className="flex flex-wrap gap-1.5 max-w-[250px]">
-                          {student.skills.map(sk => (
-                            <span key={sk} className="text-xs font-medium bg-slate-100 text-slate-700 rounded-md px-2 py-0.5 border border-slate-200">{sk}</span>
-                          ))}
+                      </th>
+                      <th className="py-3.5 px-6 font-semibold">Department</th>
+                      <th 
+                        className="py-3.5 px-6 font-semibold text-center cursor-pointer select-none hover:bg-slate-100/60 transition-colors"
+                        onClick={() => handleSort('cgpa')}
+                      >
+                        <div className="flex items-center justify-center gap-1.5">
+                          <span>CGPA</span>
+                          {sortByField === 'cgpa' ? (
+                            sortOrder === 'asc' ? <ArrowUp size={13} className="text-indigo-600" /> : <ArrowDown size={13} className="text-indigo-600" />
+                          ) : (
+                            <ArrowUp size={13} className="text-slate-300 opacity-50" />
+                          )}
                         </div>
-                      </td>
-                      <td className="py-3 px-6 text-center">
-                        <span className={`text-xs font-medium px-2.5 py-0.5 rounded-full border ${
-                          student.placedStatus === 'Placed' ? 'bg-emerald-50 text-emerald-700 border-emerald-200' : 'bg-slate-50 text-slate-600 border-slate-200'
-                        }`}>
-                          {student.placedStatus}
-                        </span>
-                      </td>
-                      <td className="py-3 px-6 text-center">
-                        {student.resumeUrl ? (
-                          <a href={student.resumeUrl} target="_blank" rel="noreferrer" download={(student.resumeUrl || '').startsWith('data:') ? 'resume.pdf' : undefined} className="text-indigo-600 hover:text-indigo-800 text-sm font-medium">
-                            View PDF
-                          </a>
-                        ) : (
-                          <span className="text-slate-400 text-sm">N/A</span>
-                        )}
-                      </td>
-                      <td className="py-3 px-6 text-right">
-                        {student.placedStatus === 'Placed' ? (
-                          <div className="space-y-0.5">
-                            <span className="text-sm font-medium text-slate-900 block">{student.placementPackage} LPA</span>
-                            <span className="text-xs text-slate-500 block">{student.placementCompany}</span>
+                      </th>
+                      <th className="py-3.5 px-6 font-semibold">Skills</th>
+                      <th 
+                        className="py-3.5 px-6 font-semibold text-center cursor-pointer select-none hover:bg-slate-100/60 transition-colors"
+                        onClick={() => handleSort('backlogs')}
+                      >
+                        <div className="flex items-center justify-center gap-1.5">
+                          <span>Backlogs</span>
+                          {sortByField === 'backlogs' ? (
+                            sortOrder === 'asc' ? <ArrowUp size={13} className="text-indigo-600" /> : <ArrowDown size={13} className="text-indigo-600" />
+                          ) : (
+                            <ArrowUp size={13} className="text-slate-300 opacity-50" />
+                          )}
+                        </div>
+                      </th>
+                      <th className="py-3.5 px-6 text-center font-semibold">Status</th>
+                      <th className="py-3.5 px-6 text-center font-semibold">Resume</th>
+                      <th 
+                        className="py-3.5 px-6 font-semibold text-right cursor-pointer select-none hover:bg-slate-100/60 transition-colors"
+                        onClick={() => handleSort('package')}
+                      >
+                        <div className="flex items-center justify-end gap-1.5">
+                          <span>Offer (LPA)</span>
+                          {sortByField === 'package' ? (
+                            sortOrder === 'asc' ? <ArrowUp size={13} className="text-indigo-600" /> : <ArrowDown size={13} className="text-indigo-600" />
+                          ) : (
+                            <ArrowUp size={13} className="text-slate-300 opacity-50" />
+                          )}
+                        </div>
+                      </th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-slate-100">
+                    {filteredStudents.map(student => (
+                      <tr key={student.userId} className="hover:bg-slate-50/60 transition-colors">
+                        <td className="py-3.5 px-6">
+                          <div className="flex items-center gap-3">
+                            <div className="w-8 h-8 rounded-full bg-slate-100 flex items-center justify-center font-semibold text-slate-600 text-xs uppercase shadow-2xs">
+                              {student.name.charAt(0)}
+                            </div>
+                            <div>
+                              <button 
+                                onClick={() => setViewingStudent(student)} 
+                                className="font-semibold text-indigo-600 hover:text-indigo-800 text-left transition-colors block cursor-pointer"
+                              >
+                                {student.name}
+                              </button>
+                              <span className="text-xs text-slate-400 font-mono block mt-0.5">{student.rollNumber}</span>
+                            </div>
                           </div>
-                        ) : (
-                          <span className="text-slate-400 font-medium">-</span>
-                        )}
-                      </td>
-                    </tr>
-                  ))}
-                  {filteredStudents.length === 0 && (
-                    <tr>
-                      <td colSpan={6} className="text-center py-12 text-slate-500 text-sm">No students matching criteria found.</td>
-                    </tr>
-                  )}
-                </tbody>
-              </table>
+                        </td>
+                        <td className="py-3.5 px-6 text-slate-600 font-medium">{student.department}</td>
+                        <td className="py-3.5 px-6 text-center font-semibold text-slate-900">{student.cgpa.toFixed(2)}</td>
+                        <td className="py-3.5 px-6">
+                          <div className="flex flex-wrap gap-1.5 max-w-[250px]">
+                            {student.skills && student.skills.length > 0 ? (
+                              student.skills.map(sk => (
+                                <span key={sk} className="text-xs font-semibold bg-slate-50 text-slate-600 rounded px-2 py-0.5 border border-slate-200/60 shadow-2xs">{sk}</span>
+                              ))
+                            ) : (
+                              <span className="text-xs text-slate-400 font-medium italic">No skills listed</span>
+                            )}
+                          </div>
+                        </td>
+                        <td className="py-3.5 px-6 text-center font-medium">
+                          <span className={`text-xs font-semibold px-2 py-0.5 rounded border ${
+                            student.backlogs === 0 
+                              ? 'bg-emerald-50 text-emerald-700 border-emerald-100' 
+                              : 'bg-amber-50 text-amber-700 border-amber-100'
+                          }`}>
+                            {student.backlogs} {student.backlogs === 1 ? 'backlog' : 'backlogs'}
+                          </span>
+                        </td>
+                        <td className="py-3.5 px-6 text-center">
+                          <span className={`text-xs font-bold px-2.5 py-0.5 rounded-full border ${
+                            student.placedStatus === 'Placed' ? 'bg-emerald-100 text-emerald-800 border-emerald-200' : 'bg-slate-100 text-slate-700 border-slate-200'
+                          }`}>
+                            {student.placedStatus}
+                          </span>
+                        </td>
+                        <td className="py-3.5 px-6 text-center">
+                          {student.resumeUrl ? (
+                            <a 
+                              href={student.resumeUrl} 
+                              target="_blank" 
+                              rel="noreferrer" 
+                              download={(student.resumeUrl || '').startsWith('data:') ? 'resume.pdf' : undefined} 
+                              className="text-indigo-600 hover:text-indigo-800 text-sm font-semibold hover:underline"
+                            >
+                              View PDF
+                            </a>
+                          ) : (
+                            <span className="text-slate-400 text-sm font-medium">N/A</span>
+                          )}
+                        </td>
+                        <td className="py-3.5 px-6 text-right">
+                          {student.placedStatus === 'Placed' ? (
+                            <div className="space-y-0.5">
+                              <span className="text-sm font-bold text-slate-900 block">{student.placementPackage} LPA</span>
+                              <span className="text-xs text-slate-400 font-medium block">{student.placementCompany}</span>
+                            </div>
+                          ) : (
+                            <span className="text-slate-400 font-medium italic">-</span>
+                          )}
+                        </td>
+                      </tr>
+                    ))}
+                    {filteredStudents.length === 0 && (
+                      <tr>
+                        <td colSpan={8} className="text-center py-16 text-slate-400 text-sm font-medium">
+                          No profiles matching your search or filters were found. Try resetting the criteria.
+                        </td>
+                      </tr>
+                    )}
+                  </tbody>
+                </table>
+              </div>
             </div>
           </div>
         )}
