@@ -70,16 +70,263 @@ const initialData: DatabaseSchema = {
   ],
   notifications: [],
   users: [
-    { id: 'usr_admin1', email: 'admin@college.edu', role: 'admin', name: 'System Administrator' }
+    { id: 'usr_admin1', email: 'admin@college.edu', role: 'admin', name: 'System Administrator' },
+    { id: 'usr_stud1', email: 'john@college.edu', role: 'student', name: 'John Doe' },
+    { id: 'usr_stud2', email: 'priya@college.edu', role: 'student', name: 'Priya Sharma' },
+    { id: 'usr_stud3', email: 'amit@college.edu', role: 'student', name: 'Amit Verma' },
+    { id: 'usr_stud4', email: 'sid@college.edu', role: 'student', name: 'Siddharth Patel' },
+    { id: 'usr_comp1', email: 'recruiter@google.com', role: 'company', name: 'Google Recruiter' },
+    { id: 'usr_comp2', email: 'recruiter@tesla.com', role: 'company', name: 'Tesla Recruiter' },
+    { id: 'usr_comp4', email: 'recruiter@infosys.com', role: 'company', name: 'Infosys Recruiter' }
   ],
-  students: [],
-  companies: [],
-  jobs: [],
-  applications: [],
+  students: [
+    {
+      userId: 'usr_stud1',
+      name: 'John Doe',
+      email: 'john@college.edu',
+      rollNumber: 'CS2023041',
+      departmentId: 'dept_cs',
+      department: 'Computer Science',
+      cgpa: 8.45,
+      tenthPercentage: 88.5,
+      twelfthPercentage: 91.2,
+      backlogs: 0,
+      skills: ['React', 'TypeScript', 'Node.js', 'Express', 'Tailwind CSS', 'SQL'],
+      projects: [
+        {
+          title: 'Campus Recruitment Portal',
+          description: 'A full-stack placement tracking system with real-time analytics and student-employer matchmaking.',
+          url: 'https://github.com/johndoe/campus-recruit'
+        },
+        {
+          title: 'Smart Health Monitoring',
+          description: 'IoT-based dashboard for checking real-time patient biometrics using WebSockets.',
+          url: 'https://github.com/johndoe/smart-health'
+        }
+      ],
+      resumeUrl: 'https://example.com/resumes/john_doe.pdf',
+      placedStatus: 'Unplaced'
+    },
+    {
+      userId: 'usr_stud2',
+      name: 'Priya Sharma',
+      email: 'priya@college.edu',
+      rollNumber: 'IT2023089',
+      departmentId: 'dept_it',
+      department: 'Information Technology',
+      cgpa: 9.12,
+      tenthPercentage: 92.0,
+      twelfthPercentage: 94.5,
+      backlogs: 0,
+      skills: ['Java', 'Spring Boot', 'PostgreSQL', 'Docker', 'Python', 'Machine Learning'],
+      projects: [
+        {
+          title: 'E-Commerce Microservices',
+          description: 'Scalable service-oriented architecture using Spring Cloud, Eureka, and Redis caching.',
+          url: 'https://github.com/priya/micro-shop'
+        }
+      ],
+      resumeUrl: 'https://example.com/resumes/priya_sharma.pdf',
+      placedStatus: 'Placed',
+      placementCompany: 'Google Inc',
+      placementPackage: 22.5
+    },
+    {
+      userId: 'usr_stud3',
+      name: 'Amit Verma',
+      email: 'amit@college.edu',
+      rollNumber: 'CE2023012',
+      departmentId: 'dept_ce',
+      department: 'Computer Engineering',
+      cgpa: 7.82,
+      tenthPercentage: 81.0,
+      twelfthPercentage: 83.2,
+      backlogs: 0,
+      skills: ['C++', 'Python', 'Django', 'MongoDB', 'Docker'],
+      projects: [
+        {
+          title: 'AI Code Assistant',
+          description: 'Fine-tuned LLM interface for code auto-completion and documentation generation.'
+        }
+      ],
+      resumeUrl: 'https://example.com/resumes/amit_verma.pdf',
+      placedStatus: 'Placed',
+      placementCompany: 'Tesla Motors',
+      placementPackage: 14.0
+    },
+    {
+      userId: 'usr_stud4',
+      name: 'Siddharth Patel',
+      email: 'sid@college.edu',
+      rollNumber: 'ME2023105',
+      departmentId: 'dept_mech',
+      department: 'Mechanical Engineering',
+      cgpa: 8.10,
+      tenthPercentage: 85.4,
+      twelfthPercentage: 80.8,
+      backlogs: 1,
+      skills: ['SolidWorks', 'MATLAB', 'AutoCAD', 'Python', 'Ansys'],
+      projects: [
+        {
+          title: 'Automated Solar Tracker',
+          description: 'Designed a dual-axis solar tracking system using Arduino and light-dependent resistors.'
+        }
+      ],
+      resumeUrl: 'https://example.com/resumes/sid_patel.pdf',
+      placedStatus: 'Unplaced'
+    }
+  ],
+  companies: [
+    {
+      userId: 'usr_comp1',
+      name: 'Google Inc',
+      email: 'recruiter@google.com',
+      industry: 'Technology & Cloud',
+      website: 'https://google.com',
+      location: 'Mountain View, CA / Bangalore',
+      description: 'Google LLC is an American multinational technology company focusing on artificial intelligence, search engine technology, online advertising, cloud computing, computer software, quantum computing, e-commerce, and consumer electronics.',
+      isApproved: true
+    },
+    {
+      userId: 'usr_comp2',
+      name: 'Tesla Motors',
+      email: 'recruiter@tesla.com',
+      industry: 'Automotive & Energy',
+      website: 'https://tesla.com',
+      location: 'Austin, TX / Pune',
+      description: 'Tesla, Inc. is an American multinational automotive and clean energy company headquartered in Austin, Texas, which designs and manufactures electric vehicles, battery energy storage from home to grid-scale, solar panels and solar roof tiles.',
+      isApproved: true
+    },
+    {
+      userId: 'usr_comp4',
+      name: 'Infosys',
+      email: 'recruiter@infosys.com',
+      industry: 'Consulting & IT Services',
+      website: 'https://infosys.com',
+      location: 'Bangalore, India',
+      description: 'Infosys Limited is an Indian multinational information technology company that provides business consulting, information technology and outsourcing services.',
+      isApproved: false
+    }
+  ],
+  jobs: [
+    {
+      id: 'job_google1',
+      companyId: 'usr_comp1',
+      companyName: 'Google Inc',
+      title: 'Software Engineer - Frontend',
+      description: '<p>Join Google as a Software Engineer inside our cloud console group. You will build highly responsive interfaces, work with modern frontend tech, and optimize system-wide components.</p>',
+      requirements: ['Solid understanding of React and TypeScript', 'Strong data structure fundamentals', 'Experience with Tailwind CSS and performance tuning'],
+      cgpaCutoff: 8.5,
+      backlogsAllowed: 0,
+      allowedDepartments: ['dept_cs', 'dept_it', 'dept_ce'],
+      packageAmount: 22.5,
+      jobType: 'Full-Time',
+      location: 'Bangalore, India',
+      workMode: 'Hybrid',
+      postedDate: '2026-08-01',
+      lastDateToApply: '2026-08-15',
+      status: 'Open'
+    },
+    {
+      id: 'job_tesla1',
+      companyId: 'usr_comp2',
+      companyName: 'Tesla Motors',
+      title: 'Robotics Software Intern',
+      description: '<p>Tesla is looking for robotics interns to support our Gigafactory automation loops. Work with motor drivers, control algorithms, and Python visual tracking pipelines.</p>',
+      requirements: ['Excellent C++ and Python skills', 'Coursework or project experience in robotics / control systems', 'Familiarity with ROS (Robot Operating System)'],
+      cgpaCutoff: 7.5,
+      backlogsAllowed: 1,
+      allowedDepartments: ['dept_cs', 'dept_ce', 'dept_mech', 'dept_ee'],
+      packageAmount: 14.0,
+      jobType: 'Internship',
+      location: 'Austin, TX / Pune',
+      workMode: 'On-Site',
+      postedDate: '2026-08-02',
+      lastDateToApply: '2026-08-20',
+      status: 'Open'
+    }
+  ],
+  applications: [
+    {
+      id: 'app_priya_google',
+      jobId: 'job_google1',
+      studentId: 'usr_stud2',
+      studentName: 'Priya Sharma',
+      studentRollNumber: 'IT2023089',
+      studentDepartment: 'Information Technology',
+      studentCgpa: 9.12,
+      studentResumeUrl: 'https://example.com/resumes/priya_sharma.pdf',
+      jobTitle: 'Software Engineer - Frontend',
+      companyName: 'Google Inc',
+      appliedDate: '2026-08-02',
+      status: 'Placed',
+      remarks: 'Outstanding performance across all coding rounds. Offered 22.5 LPA.'
+    },
+    {
+      id: 'app_amit_tesla',
+      jobId: 'job_tesla1',
+      studentId: 'usr_stud3',
+      studentName: 'Amit Verma',
+      studentRollNumber: 'CE2023012',
+      studentDepartment: 'Computer Engineering',
+      studentCgpa: 7.82,
+      studentResumeUrl: 'https://example.com/resumes/amit_verma.pdf',
+      jobTitle: 'Robotics Software Intern',
+      companyName: 'Tesla Motors',
+      appliedDate: '2026-08-03',
+      status: 'Placed',
+      remarks: 'Strong embedded system knowledge and passionate presentation of his solar project.'
+    },
+    {
+      id: 'app_john_google',
+      jobId: 'job_google1',
+      studentId: 'usr_stud1',
+      studentName: 'John Doe',
+      studentRollNumber: 'CS2023041',
+      studentDepartment: 'Computer Science',
+      studentCgpa: 8.45,
+      studentResumeUrl: 'https://example.com/resumes/john_doe.pdf',
+      jobTitle: 'Software Engineer - Frontend',
+      companyName: 'Google Inc',
+      appliedDate: '2026-08-02',
+      status: 'Shortlisted',
+      remarks: 'Selected for technical interview rounds.'
+    }
+  ],
   interviews: []
 };
 
 let dbStateCache: DatabaseSchema | null = null;
+
+function seedIfNeeded(data: DatabaseSchema): DatabaseSchema {
+  let modified = false;
+  if (!data.students || data.students.length === 0) {
+    data.students = initialData.students;
+    modified = true;
+  }
+  if (!data.companies || data.companies.length === 0) {
+    data.companies = initialData.companies;
+    modified = true;
+  }
+  if (!data.users || data.users.length <= 1) {
+    data.users = initialData.users;
+    modified = true;
+  }
+  if (!data.jobs || data.jobs.length === 0) {
+    data.jobs = initialData.jobs;
+    modified = true;
+  }
+  if (!data.applications || data.applications.length === 0) {
+    data.applications = initialData.applications;
+    modified = true;
+  }
+  
+  if (modified) {
+    console.log('[Seed] Database populated with pre-loaded dummy data.');
+    saveDatabase(data);
+  }
+  return data;
+}
 
 export async function initDatabase(): Promise<DatabaseSchema> {
   if (db) {
@@ -94,7 +341,7 @@ export async function initDatabase(): Promise<DatabaseSchema> {
         if (!dbStateCache.departments) dbStateCache.departments = initialData.departments;
         
         console.log('[Firebase] State loaded from Firestore');
-        return dbStateCache;
+        return seedIfNeeded(dbStateCache);
       } else {
         console.log('[Firebase] No existing state found, creating default state');
         dbStateCache = initialData;
@@ -131,8 +378,8 @@ export async function initDatabase(): Promise<DatabaseSchema> {
     const data = JSON.parse(raw) as DatabaseSchema;
     if (!data.notifications) data.notifications = [];
     if (!data.departments) data.departments = initialData.departments;
-    dbStateCache = data;
-    return data;
+    dbStateCache = seedIfNeeded(data);
+    return dbStateCache;
   } catch (error) {
     console.error('Error reading database file, resetting to defaults.', error);
     fs.writeFileSync(DB_FILE, JSON.stringify(initialData, null, 2), 'utf-8');

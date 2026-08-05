@@ -13,6 +13,12 @@
   height: 8px;
 }
 
+::-webkit-scrollbar-button {
+  display: none !important;
+  width: 0 !important;
+  height: 0 !important;
+}
+
 body:not(.theme-light) ::-webkit-scrollbar-track {
   background: #090e0b;
 }
