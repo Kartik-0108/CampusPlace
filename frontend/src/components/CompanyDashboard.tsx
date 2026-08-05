@@ -396,7 +396,7 @@ export default function CompanyDashboard({ userId }: CompanyDashboardProps) {
       </div>
 
       {/* Navigation Tabs */}
-      <div className="flex overflow-x-auto [overflow-x-auto::-webkit-scrollbar]:hidden whitespace-nowrap border-b-2 border-slate-200 bg-slate-50 px-2 rounded-t font-mono">
+      <div className="flex overflow-x-auto no-scrollbar whitespace-nowrap border-b-2 border-slate-200 bg-slate-50 px-2 rounded-t font-mono">
         {[
           { id: 'overview', label: 'Dashboard' },
           { id: 'post_job', label: 'Post Drive' },

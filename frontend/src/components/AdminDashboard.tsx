@@ -420,7 +420,7 @@ export default function AdminDashboard() {
       </div>
 
       {/* Tabs */}
-      <div className="flex overflow-x-auto [overflow-x-auto::-webkit-scrollbar]:hidden whitespace-nowrap border-b-2 border-slate-200 bg-slate-50 px-2 rounded-t font-mono">
+      <div className="flex overflow-x-auto no-scrollbar whitespace-nowrap border-b-2 border-slate-200 bg-slate-50 px-2 rounded-t font-mono">
         {[
           { id: 'overview', label: 'Analytics & Reports' },
           { id: 'companies', label: `Recruiters Accreditation (${companies.filter(c => !c.isApproved).length} Pending)` },
@@ -668,7 +668,7 @@ export default function AdminDashboard() {
                   Course & Department Overview
                 </h3>
 
-                <div className="overflow-x-auto [overflow-x-auto::-webkit-scrollbar]:hidden">
+                <div className="overflow-x-auto no-scrollbar">
                   <table className="w-full text-left text-sm border-collapse">
                     <thead>
                       <tr className="border-b border-slate-200 text-slate-500 font-medium">
@@ -1007,7 +1007,7 @@ export default function AdminDashboard() {
               )}
 
               {/* Enhanced Students Table with Column Header Toggles */}
-              <div className="overflow-x-auto [overflow-x-auto::-webkit-scrollbar]:hidden">
+              <div className="overflow-x-auto no-scrollbar">
                 <table className="w-full text-left text-sm border-collapse">
                   <thead>
                     <tr className="border-b border-slate-200 text-slate-500 font-semibold bg-slate-50/50">
