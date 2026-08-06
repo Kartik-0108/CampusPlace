@@ -78,11 +78,11 @@ export default function App() {
         setUser(res.user);
       } else {
         removeToken();
+        setLoading(false);
       }
     } catch (err) {
       console.error('Session check failed', err);
       removeToken();
-    } finally {
       setLoading(false);
     }
   };
@@ -144,15 +144,12 @@ export default function App() {
   };
 
   const handleAuthSuccess = (authenticatedUser: User) => {
+    setUser(authenticatedUser);
     setLoading(true);
-    setTimeout(() => {
-      setUser(authenticatedUser);
-      setLoading(false);
-    }, 1800);
   };
 
   if (loading) {
-    return <MainframeLoading />;
+    return <MainframeLoading onComplete={() => setLoading(false)} />;
   }
 
   if (!user) {
